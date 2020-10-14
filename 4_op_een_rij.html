@@ -32,24 +32,63 @@ td:hover::after,
 </style>
 
 <script>
+// create global variables
 var array_list = [0, 0, 0, 0, 0, 0 ,0];
 var beurt_count= 0
 var color_player1 = 'red'
 var color_player2 = 'yellow'
 var placed_stones_list=[]
+
+
+// create a list with zeros
 for(var y = 0; y < 42; y++){
       placed_stones_list[y] = 0;
       }
 
+// functions:
 function count_stones(col_num){
     array_list[col_num] ++
 }
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function demo(cell) {
+    cell.style.backgroundColor = 'pink';
+    console.log('Pink');
+    await sleep(5000);
+    
+    consol
+    
+    }
+async function demo_white(cell) {
+    await sleep(5000);
+    cell.style.backgroundColor =  'white'; 
+    console.log('white');
+    
+    }
+    
 function changecolor(pos1, pos2) {
     var x = document.getElementById("mytable").getElementsByTagName("td");
-    x[35+pos2-7*array_list[pos2]].innerHTML = "O";
 
-    if(beurt_count%2 == 0){
+    // Add a for loop to let the stone fall:
+    stone_end_point = 35+pos2-7*array_list[pos2]
+    stone_start_point = stone_end_point % 7 
+    //console.log(stone_start_point, stone_end_point)
+    
+    //for(var i = stone_start_point; i < (stone_end_point-1); i+=7){
+    //    console.log(i)
+    //    demo(x[i])
+    //    demo_white(x[i])
         
+    //}
+
+    //for(var i = stone_start_point; i < stone_end_point+1; i+7){
+    //    console.log(i)
+    //}
+
+    x[35+pos2-7*array_list[pos2]].innerHTML = "O";
+    if(beurt_count%2 == 0){
         x[35+pos2-7*array_list[pos2]].style.backgroundColor = color_player1;  
         placed_stones_list[35+pos2-7*array_list[pos2]] = 1
     }   
@@ -63,19 +102,14 @@ function changecolor(pos1, pos2) {
     check_winner()
 }
 
-function show_turn_player(){
+function show_selected_players(){
     var player1 = document.getElementById("speler1_input").value
     var player2 = document.getElementById("speler2_input").value
-    
-    
     color_player1 = document.getElementById("choose_color_1").value
     color_player2 = document.getElementById("choose_color_2").value
-
+    // Show the selected player names and corresponding colors
     document.getElementById("output_playernames").innerHTML = "Player 1 is: "+ player1.fontcolor(color_player1) + "<br> Player 2 is: " + player2.fontcolor(color_player2)
-    
-    console.log(color_player1)
-    console.log(color_player2)
-    console.log(player1)
+ 
     // Hide the input boxes
     document.getElementById("speler1_input").hidden = true
     document.getElementById("choose_color_1").hidden = true
@@ -89,7 +123,8 @@ function hover_changecolor(pos1, pos2) {
     var x = document.getElementById("mytable").getElementsByTagName("td");
 
     if(beurt_count%2 == 0){
-        x[35+pos2-7*array_list[pos2]].style.backgroundColor = color_player1;  
+        x[35+pos2-7*array_list[pos2]].style.backgroundColor = color_player1;
+        
     }   
     else{
         x[35+pos2-7*array_list[pos2]].style.backgroundColor = color_player2;  
@@ -101,158 +136,95 @@ function mouseout_changecolor(pos1, pos2) {
     x[35+pos2-7*array_list[pos2]].style.backgroundColor = 'white';  
 }
 
+
+function find_winnner_if_else_statements( statement, prev_pos_value, winner_count, index){
+    position_value =  placed_stones_list[index];
+    if (statement){
+            console.log(winner_count)
+            if (position_value != 0){
+                winner_count = 1
+            }
+            else{
+                winner_count = 0
+            }
+        }
+        else {
+            if ((position_value == prev_pos_value) && (position_value != 0 )){
+                winner_count++
+            }
+            else if ((position_value != prev_pos_value) && (position_value != 0 )){
+                winner_count = 1
+            }
+            else{
+                winner_count = 0
+            }
+        }
+        prev_pos_value = position_value
+        if (winner_count == 4){
+            alert("We have a Winner at index: " +  index)
+        }
+    return [winner_count, prev_pos_value];
+    }
+
+
 function check_winner (){
+    // horizontal
     var winner_count = 1
     var prev_pos_value = -1
     for(var i = 0; i < 42; i++){
-        position_value =  placed_stones_list[i];
-        if (i%7 == 0){
-            if (position_value != 0){
-                winner_count = 1
-            }
-            else{
-                winner_count = 0
-            }
-        }
-        else {
-            if ((position_value == prev_pos_value) && (position_value != 0 )){
-                winner_count++
-            }
-            else if ((position_value != prev_pos_value) && (position_value != 0 )) {
-                winner_count = 1
-            }
-            else{
-                winner_count = 0
-            }
-        }
-        prev_pos_value = position_value
-        if (winner_count == 4){
-            alert("We have a Winner")
-        }
-        else{}
+        var temp_output = find_winnner_if_else_statements((i%7 == 0), prev_pos_value, winner_count, i);
+        winner_count = temp_output[0];
+        prev_pos_value = temp_output[1];
     }
 
-    var winner_count_vert = 1
-    var prev_pos_value_vert = -1
+    //vertical
+    var winner_count = 1
+    var prev_pos_value = -1
     for(var j = 0; j < 7; j++){
         for (var k = 0; k < 6; k++){
             var idx = j+k*7
-        position_value =  placed_stones_list[idx];
-        if (idx<7){
-            if (position_value != 0){
-                winner_count_vert = 1
-            }
-            else{
-                winner_count_vert = 0
-            }
+            var temp_output = find_winnner_if_else_statements((idx<7), prev_pos_value, winner_count, idx);
+            winner_count = temp_output[0];
+            prev_pos_value = temp_output[1];
         }
-        else {
-            if ((position_value == prev_pos_value_vert) && (position_value != 0 )){
-                winner_count_vert++
-            }
-            else if ((position_value != prev_pos_value_vert) && (position_value != 0 )) {
-                winner_count_vert = 1
-            }
-            else{
-                winner_count_vert = 0
-            }
-        }
-        prev_pos_value_vert = position_value
-        if (winner_count_vert == 4){
-            alert("We have a Winner")
-        }
-        else{}
     }
-    }
-
-    var left_to_right_list = [[0,0], [0,1],[0,2],[0,3], [1,0], [2,0]]
-    
+    //diagonal left -> right
+    var diag_left_to_right_list = [[0,0], [0,1], [0,2], [0,3], [1,0], [2,0]]
     var winner_count = 1
     var prev_pos_value = -1
-    for(list_index in left_to_right_list){
-        
-
-        var temp_index = left_to_right_list[list_index]
-        console.log(temp_index)
+    for(list_index in diag_left_to_right_list){
+        var temp_index = diag_left_to_right_list[list_index]
         while ((temp_index[0] < 6) && (temp_index[1]<7)){
-            
-            var idx = temp_index[0] * 7 + temp_index[1]
+            var idx = temp_index[0] * 7 + temp_index[1];
+            var temp_output = find_winnner_if_else_statements((idx<7), prev_pos_value, winner_count, idx);
 
-        position_value =  placed_stones_list[idx];
-        if (idx in [0,1,2,3,7,14]){
-            if (position_value != 0){
-                winner_count = 1
-            }
-            else{
-                winner_count = 0
-            }
-        }
-        else {
-            if ((position_value == prev_pos_value) && (position_value != 0 )){
-                winner_count++
-            }
-            else if ((position_value != prev_pos_value) && (position_value != 0 )) {
-                winner_count = 1
-            }
-            else{
-                winner_count = 0
-            }
-        }
-        prev_pos_value = position_value
-        if (winner_count == 4){
-            alert("We have a Winner")
-        }
-        else{}
-        temp_index[0]++
-        temp_index[1]++
+            winner_count = temp_output[0];
+            prev_pos_value = temp_output[1];        
+            temp_index[0]++
+            temp_index[1]++
         }
     }
-    
-
-
-
-var right_to_left_list = [[0,3], [0,4],[0,5],[0,6], [1,6], [2,6]]
-var winner_count = 1
+    //diagonal right -> left
+    var diag_right_to_left_list = [[0,3], [0,4], [0,5], [0,6], [1,6], [2,6]]
+    var winner_count = 1
     var prev_pos_value = -1
-    for(list_index in right_to_left_list){
-        
-
-        var temp_index = right_to_left_list[list_index]
-        console.log(temp_index)
+    for(list_index in diag_right_to_left_list){
+        var temp_index = diag_right_to_left_list[list_index]
         while ((temp_index[0] < 6) && (temp_index[1]>-1)){
+            var idx = temp_index[0] * 7 + temp_index[1];
+            //console.log(temp_count)
+            //console.log(position_value)
+            //console.log(position_value, prev_pos_value)
+            //console.log(temp_index, temp_index[1])
+            //console.log(placed_stones_list[idx])
+            var temp_output = find_winnner_if_else_statements((idx in [0,1,2,3,7,14]), prev_pos_value, winner_count, idx);
             
-            var idx = temp_index[0] * 7 + temp_index[1]
-
-        position_value =  placed_stones_list[idx];
-        if (idx in [3,4,5,6,13,20]){
-            if (position_value != 0){
-                winner_count = 1
-            }
-            else{
-                winner_count = 0
-            }
-        }
-        else {
-            if ((position_value == prev_pos_value) && (position_value != 0 )){
-                winner_count++
-            }
-            else if ((position_value != prev_pos_value) && (position_value != 0 )) {
-                winner_count = 1
-            }
-            else{
-                winner_count = 0
-            }
-        }
-        prev_pos_value = position_value
-        if (winner_count == 4){
-            alert("We have a Winner")
-        }
-        else{}
-        temp_index[0]++
-        temp_index[1]+=-1
+            winner_count = temp_output[0];
+            prev_pos_value = temp_output[1];
+            temp_index[0]++;
+            temp_index[1]+=-1;
         }
     }
-
 }
 </script>
 </head>
@@ -269,7 +241,7 @@ var winner_count = 1
 <br>
 <input type=text id=choose_color_2 placeholder= "Choose a color for p2"> 
 <div id=output_playernames> </div>
-<input id= confirm_button type=button onclick=show_turn_player() value="confirm"> 
+<input id= confirm_button type=button onclick=show_selected_players() value="confirm"> 
 
 
 <br><br><br>
@@ -331,13 +303,4 @@ var winner_count = 1
 </table>
 
 </body>
-
-
-
-</html>
-
-</body>
-
-
-
 </html>
